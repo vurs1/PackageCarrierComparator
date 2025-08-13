@@ -17,17 +17,13 @@ HEADERS = {
     "Authorization": f"ShippoToken {SHIPPO_API_TOKEN}",
     "Content-Type": "application/json"
 }
-
+#Gets shipping rates from Shippo API for the given package dimensions and addresses
 def get_shippo_rates(package_details):
-    """
-    Get shipping rates from Shippo API for the given package dimensions and addresses
-    """
-
-    # Get addresses from user input
+    # Takes user input
     address_from = package_details.get("address_from", {})
     address_to = package_details.get("address_to", {})
     
-    # format addresses for Shippo API
+    # formats addresses for Shippo API
     def format_address(addr, addr_type):
         if not addr:
             raise ValueError(f"{addr_type} address is required")
@@ -79,7 +75,7 @@ def get_shippo_rates(package_details):
         response.raise_for_status()
         shipment = response.json()
 
-        # Count carriers for logging
+        # Counts the number of carriers for logging
         carriers_found = set()
         for rate in shipment.get("rates", []):
             carriers_found.add(rate["provider"])
@@ -89,14 +85,14 @@ def get_shippo_rates(package_details):
         rates = shipment.get("rates", [])
         results = []
         for rate in rates:
-            # Get delivery time from API or infer from service name
+            
             delivery_days = rate.get('days')
             service_name = rate["servicelevel"]["name"].lower()
             
             if delivery_days:
                 delivery_time = f"{delivery_days} days"
             else:
-                # Infer delivery time from service name
+                # Time estimates for each of the services
                 if "priority mail express" in service_name or "next day air" in service_name:
                     delivery_time = "1 day"
                 elif "2nd day air" in service_name or "second day air" in service_name:
@@ -144,7 +140,7 @@ def compare():
         try:
             dt = carrier["delivery_time"]
             if dt.lower() == "n/a":
-                # Try to infer delivery time from service name
+                # Prediction of delivery time for services
                 service_name = carrier["service"].lower()
                 
                 # USPS services
@@ -165,17 +161,16 @@ def compare():
                 elif "ground" in service_name:
                     return 5
                 
-                # Default for unknown services
                 return None
             return int(dt.split()[0])
         except:
             return None
 
-    # Mark cheapest and fastest options
+    # Marks cheapest and fastest options
     if results:
         min_price = min(c["price"] for c in results)
         
-        # Only consider services with actual delivery time data for fastest
+        # Comparing delivery times for fastest
         services_with_delivery = [c for c in results if delivery_days(c) is not None]
         min_days = min(delivery_days(c) for c in services_with_delivery) if services_with_delivery else None
 
