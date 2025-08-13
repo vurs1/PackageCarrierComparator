@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Package Carrier Comparator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            animation: slideInUp 0.8s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .form-control:hover {
+            border-color: #667eea;
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            transform: translateX(-20px);
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-20px);
+            }
+        }
+        
+        .form-group {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .carrier-card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            animation: slideInRight 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .carrier-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .carrier-card.cheapest {
+            border-left: 5px solid #28a745;
+            animation: pulse 2s infinite;
+        }
+        
+        .carrier-card.fastest {
+            border-left: 5px solid #007bff;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
+            50% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1), 0 0 20px rgba(40, 167, 69, 0.3); }
+            100% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
+        }
+        
+        /* USPS styling - blue theme */
+        .carrier-card.usps {
+            border-left: 5px solid #0052a5;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+        }
+        .carrier-card.usps .carrier-title {
+            color: #0052a5;
+        }
+        .carrier-card.usps .price {
+            color: #0052a5;
+        }
+        .carrier-card.usps:hover {
+            box-shadow: 0 15px 30px rgba(0, 82, 165, 0.2);
+        }
+        
+        /* UPS styling - brown theme */
+        .carrier-card.ups {
+            border-left: 5px solid #351c15;
+            background: linear-gradient(135deg, #fefefe 0%, #f5f5f5 100%);
+        }
+        .carrier-card.ups .carrier-title {
+            color: #351c15;
+        }
+        .carrier-card.ups .price {
+            color: #351c15;
+        }
+        .carrier-card.ups:hover {
+            box-shadow: 0 15px 30px rgba(53, 28, 21, 0.2);
+        }
+        
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .carrier-card:hover .price {
+            transform: scale(1.1);
+        }
+        
+        .badge-cheapest {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            animation: bounce 1s infinite;
+        }
+        
+        .badge-fastest {
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            color: white;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+            60% { transform: translateY(-3px); }
+        }
+        
+        .loading {
+            display: none;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #721c24;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        
+        .floating-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .floating-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .floating-icon:hover .tooltip {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="main-container p-5">
+                    <!-- Page header -->
+                    <div class="text-center mb-5">
+                        <h1 class="display-4 fw-bold text-primary mb-3">
+                            <i class="fas fa-shipping-fast me-3"></i>
+                            Package Carrier Comparator
+                        </h1>
+                        <p class="lead text-muted">
+                            Find the best shipping option for your package by comparing rates from multiple carriers.
+                        </p>
+                    </div>
+
+                    <!-- Package input form -->
+                    <form id="packageForm" class="mb-5">
+                        <div class="row g-4">
+                            <!-- Package Details -->
+                            <div class="col-12">
+                                <div class="section-header">
+                                    <h4 class="mb-0">
+                                        <i class="fas fa-box me-2"></i>Package Details
+                                    </h4>
+                                </div>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="weight" class="form-label fw-bold">
+                                    <i class="fas fa-weight-hanging me-2"></i>Weight (lbs)
+                                </label>
+                                <input type="number" class="form-control" id="weight" name="weight" 
+                                       step="0.1" min="0.1" max="150" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="length" class="form-label fw-bold">
+                                    <i class="fas fa-ruler-horizontal me-2"></i>Length (inches)
+                                </label>
+                                <input type="number" class="form-control" id="length" name="length" 
+                                       step="0.1" min="0.1" max="108" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="width" class="form-label fw-bold">
+                                    <i class="fas fa-ruler-vertical me-2"></i>Width (inches)
+                                </label>
+                                <input type="number" class="form-control" id="width" name="width" 
+                                       step="0.1" min="0.1" max="108" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="height" class="form-label fw-bold">
+                                    <i class="fas fa-arrows-alt-v me-2"></i>Height (inches)
+                                </label>
+                                <input type="number" class="form-control" id="height" name="height" 
+                                       step="0.1" min="0.1" max="108" required>
+                            </div>
+                            
+                            <!-- From Address -->
+                            <div class="col-12 mt-4">
+                                <div class="section-header">
+                                    <h4 class="mb-0">
+                                        <i class="fas fa-home me-2"></i>From Address
+                                    </h4>
+                                </div>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="fromName" class="form-label fw-bold">Name</label>
+                                <input type="text" class="form-control" id="fromName" name="fromName" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="fromStreet" class="form-label fw-bold">Street Address</label>
+                                <input type="text" class="form-control" id="fromStreet" name="fromStreet" required>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label for="fromCity" class="form-label fw-bold">City</label>
+                                <input type="text" class="form-control" id="fromCity" name="fromCity" required>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label for="fromState" class="form-label fw-bold">State</label>
+                                <input type="text" class="form-control" id="fromState" name="fromState" required>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label for="fromZip" class="form-label fw-bold">ZIP Code</label>
+                                <input type="text" class="form-control" id="fromZip" name="fromZip" required>
+                            </div>
+                            
+                            <!-- To Address -->
+                            <div class="col-12 mt-4">
+                                <div class="section-header">
+                                    <h4 class="mb-0">
+                                        <i class="fas fa-map-pin me-2"></i>To Address
+                                    </h4>
+                                </div>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="toName" class="form-label fw-bold">Name</label>
+                                <input type="text" class="form-control" id="toName" name="toName" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="toStreet" class="form-label fw-bold">Street Address</label>
+                                <input type="text" class="form-control" id="toStreet" name="toStreet" required>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label for="toCity" class="form-label fw-bold">City</label>
+                                <input type="text" class="form-control" id="toCity" name="toCity" required>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label for="toState" class="form-label fw-bold">State</label>
+                                <input type="text" class="form-control" id="toState" name="toState" required>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label for="toZip" class="form-label fw-bold">ZIP Code</label>
+                                <input type="text" class="form-control" id="toZip" name="toZip" required>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-search me-2"></i>Compare Carriers
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Loading indicator -->
+                    <div id="loading" class="loading text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Finding the best shipping rates...</p>
+                    </div>
+
+                    <!-- Errors -->
+                    <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+                    <!-- Results -->
+                    <div id="results" style="display: none;">
+                        <h3 class="mb-4">
+                            <i class="fas fa-list-alt me-2"></i>Available Shipping Options
+                        </h3>
+                        <div id="resultsContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating action button -->
+    <div class="floating-icon" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+        <div class="tooltip">Back to top</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Progress bar animation
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = percent + '%';
+        }
+        
+        // Scroll to top function
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Show floating button on scroll
+        window.addEventListener('scroll', function() {
+            const floatingIcon = document.querySelector('.floating-icon');
+            if (window.scrollY > 300) {
+                floatingIcon.style.display = 'flex';
+            } else {
+                floatingIcon.style.display = 'none';
+            }
+        });
+        
+        // Handle form submission
+        document.getElementById('packageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Update progress bar
+            updateProgress(25);
+            
+            // Shows loading spinner
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            updateProgress(50);
+            
+            // Get package dimensions and addresses from form
+            const formData = {
+                weight: parseFloat(document.getElementById('weight').value),
+                length: parseFloat(document.getElementById('length').value),
+                width: parseFloat(document.getElementById('width').value),
+                height: parseFloat(document.getElementById('height').value),
+                address_from: {
+                    name: document.getElementById('fromName').value,
+                    street1: document.getElementById('fromStreet').value,
+                    city: document.getElementById('fromCity').value,
+                    state: document.getElementById('fromState').value,
+                    zip: document.getElementById('fromZip').value,
+                    country: "US"
+                },
+                address_to: {
+                    name: document.getElementById('toName').value,
+                    street1: document.getElementById('toStreet').value,
+                    city: document.getElementById('toCity').value,
+                    state: document.getElementById('toState').value,
+                    zip: document.getElementById('toZip').value,
+                    country: "US"
+                }
+            };
+            
+            updateProgress(75);
+            
+            try {
+                // Send request to backend
+                const response = await fetch('/compare', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                updateProgress(90);
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateProgress(100);
+                    setTimeout(() => updateProgress(0), 1000);
+                    displayResults(data.results);
+                } else {
+                    throw new Error(data.message || 'An error occurred');
+                }
+            } catch (error) {
+                updateProgress(0);
+                document.getElementById('errorMessage').textContent = 
+                    'Error: ' + error.message + '. Please try again.';
+                document.getElementById('errorMessage').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+        
+        // Display shipping results
+        function displayResults(results) {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '';
+            
+            // Sort by price (cheapest first)
+            results.sort((a, b) => a.price - b.price);
+            
+            results.forEach((result, index) => {
+                const card = document.createElement('div');
+                // Add carrier-specific styling
+                const carrierClass = result.carrier.toLowerCase();
+                card.className = `card carrier-card ${carrierClass} ${result.is_cheapest ? 'cheapest' : ''} ${result.is_fastest ? 'fastest' : ''}`;
+                card.style.animationDelay = (index * 0.1) + 's';
+                
+                // Create badges for best options
+                const badges = [];
+                if (result.is_cheapest) badges.push('<span class="badge badge-cheapest me-2"><i class="fas fa-dollar-sign me-1"></i>Cheapest</span>');
+                if (result.is_fastest) badges.push('<span class="badge badge-fastest"><i class="fas fa-tachometer-alt me-1"></i>Fastest</span>');
+                
+                card.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <h5 class="card-title carrier-title mb-1">
+                                    <i class="fas fa-truck me-2"></i>${result.carrier}
+                                </h5>
+                                <p class="text-muted mb-0">${result.service}</p>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="price">$${result.price.toFixed(2)}</div>
+                                <small class="text-muted">Shipping Cost</small>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="fw-bold">${result.delivery_time}</div>
+                                <small class="text-muted">Delivery Time</small>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                ${badges.join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            document.getElementById('results').style.display = 'block';
+        }
+        
+        // Add input focus effects
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
